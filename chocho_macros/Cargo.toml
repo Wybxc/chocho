@@ -1,0 +1,15 @@
+[package]
+name = "chocho_macros"
+version = "0.1.0"
+edition = "2021"
+description = "QQ client framework"
+license = "MPL-2.0"
+repository = "https://github.com/Wybxc/chocho"
+
+[dependencies]
+quote = "1.0.26"
+syn = "2.0.15"
+
+
+[lib]
+proc-macro = true
