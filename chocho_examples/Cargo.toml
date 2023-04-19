@@ -6,6 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.70"
 async-trait = "0.1.68"
 chocho = { path = "../chocho" }
 tracing = "0.1.37"
+tokio = { version = "1.27.0", features = ["fs"] }
+
+[[bin]]
+name = "notify"

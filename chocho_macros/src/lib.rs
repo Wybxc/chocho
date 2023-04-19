@@ -71,6 +71,9 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let mut data_folder = quote! { "./bots".to_string() };
     let mut handler = quote! { ::chocho::ricq::handler::DefaultHandler };
+    let mut uin = quote! { ::std::option::Option::None };
+    let mut login_method = quote! { ::std::option::Option::None };
+
     let mut meta_parser = |meta: ParseNestedMeta| {
         if meta.path.is_ident("data_folder") {
             let value: Expr = meta.value()?.parse()?;
@@ -78,6 +81,12 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
         } else if meta.path.is_ident("handler") {
             let value: Expr = meta.value()?.parse()?;
             handler = quote! { #value };
+        } else if meta.path.is_ident("uin") {
+            let value: Expr = meta.value()?.parse()?;
+            uin = quote! { ::std::option::Option::Some(#value) };
+        } else if meta.path.is_ident("login_method") {
+            let value: Expr = meta.value()?.parse()?;
+            login_method = quote! { ::std::option::Option::Some(#value) };
         } else {
             return Err(meta.error(format!(
                 "unexpected attribute `{}`",
@@ -140,7 +149,7 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
                 async fn #ident(#args) #output {
                     #block
                 }
-                let (client, alive) = ::chocho::init(#data_folder, #handler).await?;
+                let (client, alive) = ::chocho::init(#data_folder, #handler, #uin, #login_method).await?;
                 let result = __chocho_private::Wrap::wrap(#ident(client).await)?;
                 alive.auto_reconnect().await?;
                 Ok(result)
