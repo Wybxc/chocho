@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{parse_macro_input, ItemFn};
+use syn::{parse_macro_input, ItemFn, Expr};
 
 #[proc_macro_attribute]
 pub fn main(_: TokenStream, input: TokenStream) -> TokenStream {
@@ -22,31 +24,42 @@ pub fn main(_: TokenStream, input: TokenStream) -> TokenStream {
     let args = sig.inputs;
     let output = sig.output;
 
-    let mut data_folder = quote! {
-        "./bots".to_string()
-    };
+    let mut data_folder = quote! { "./bots".to_string() };
+    let mut handler = quote! { ::chocho::ricq::handler::DefaultHandler };
 
-    for attr in attrs {
-        let attr = attr.meta.require_name_value().unwrap();
-        match attr
-            .path
-            .get_ident()
-            .unwrap_or_else(|| {
-                panic!(
-                    "expected identifier, found `{}`",
-                    attr.path.to_token_stream()
-                )
-            })
-            .to_string()
-            .as_str()
-        {
+    let mut meta = HashMap::new();
+    attrs
+        .into_iter()
+        .map(|attr| {
+            let attr = attr.meta.require_name_value().unwrap();
+            let path = attr
+                .path
+                .get_ident()
+                .unwrap_or_else(|| {
+                    panic!(
+                        "expected identifier, found `{}`",
+                        attr.path.to_token_stream()
+                    )
+                })
+                .to_string();
+            let value = attr.value.clone();
+            (path, value)
+        })
+        .for_each(|(path, value)| {
+            meta.entry(path)
+                .and_modify(|v: &mut Expr| panic!("duplicate attribute `{}`", v.to_token_stream()))
+                .or_insert(value);
+        });
+
+    for (path, value) in meta {
+        match path.as_str() {
             "data_folder" => {
-                let value = &attr.value;
-                data_folder = quote! {
-                    ::std::string::String::from(#value)
-                };
+                data_folder = quote! { ::std::string::String::from(#value) };
             }
-            _ => panic!("unexpected attribute `{}`", attr.path.to_token_stream()),
+            "handler" => {
+                handler = quote! { #value };
+            }
+            _ => panic!("unexpected attribute `{}`", path),
         }
     }
 
@@ -89,7 +102,7 @@ pub fn main(_: TokenStream, input: TokenStream) -> TokenStream {
                 async fn #ident(#args) #output {
                     #block
                 }
-                let (client, alive) = ::chocho::init(#data_folder).await?;
+                let (client, alive) = ::chocho::init(#data_folder, #handler).await?;
                 let result = __chocho_private::Wrap::wrap(#ident(client).await)?;
                 alive.auto_reconnect().await?;
                 Ok(result)

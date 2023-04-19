@@ -3,7 +3,10 @@ use std::sync::Arc;
 use anyhow::Result;
 use login::AliveHandle;
 use requestty::Question;
-use ricq::{handler::DefaultHandler, Client};
+use ricq::{
+    handler::{ Handler},
+    Client,
+};
 
 mod device;
 mod login;
@@ -13,10 +16,11 @@ pub use chocho_macros::main;
 pub use ricq;
 pub use tokio;
 
-pub async fn init(data_folder: String) -> Result<(Arc<Client>, AliveHandle)> {
+pub async fn init(
+    data_folder: String,
+    handler: impl Handler + 'static + Send + Sync,
+) -> Result<(Arc<Client>, AliveHandle)> {
     tracing_subscriber::fmt::init();
-
-    let handler = DefaultHandler;
 
     let uin = Question::int("uin").message("请输入账号").build();
     let uin = requestty::prompt_one(uin)?.as_int().unwrap();
