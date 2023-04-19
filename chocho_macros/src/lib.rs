@@ -1,11 +1,9 @@
-use std::collections::HashMap;
-
 use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{parse_macro_input, ItemFn, Expr};
+use syn::{meta::ParseNestedMeta, parse_macro_input, Expr, ItemFn};
 
 #[proc_macro_attribute]
-pub fn main(_: TokenStream, input: TokenStream) -> TokenStream {
+pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
     let ItemFn {
         attrs, sig, block, ..
     } = parse_macro_input!(input as ItemFn);
@@ -20,48 +18,37 @@ pub fn main(_: TokenStream, input: TokenStream) -> TokenStream {
         panic!("`#[main]` must not be applied to an `extern fn`");
     }
 
+    let mut data_folder = quote! { "./bots".to_string() };
+    let mut handler = quote! { ::chocho::ricq::handler::DefaultHandler };
+    let mut meta_parser = |meta: ParseNestedMeta| {
+        if meta.path.is_ident("data_folder") {
+            let value: Expr = meta.value()?.parse()?;
+            data_folder = quote! { ::std::string::String::from(#value) };
+        } else if meta.path.is_ident("handler") {
+            let value: Expr = meta.value()?.parse()?;
+            handler = quote! { #value };
+        } else {
+            return Err(meta.error(format!(
+                "unexpected attribute `{}`",
+                meta.path.to_token_stream()
+            )));
+        }
+        Ok(())
+    };
+
+    if !args.is_empty() {
+        let arg_parser = syn::meta::parser(&mut meta_parser);
+        parse_macro_input!(args with arg_parser);
+    }
+    for attr in attrs {
+        if attr.path().is_ident("chocho") {
+            attr.parse_nested_meta(&mut meta_parser).unwrap();
+        }
+    }
+
     let ident = sig.ident;
     let args = sig.inputs;
     let output = sig.output;
-
-    let mut data_folder = quote! { "./bots".to_string() };
-    let mut handler = quote! { ::chocho::ricq::handler::DefaultHandler };
-
-    let mut meta = HashMap::new();
-    attrs
-        .into_iter()
-        .map(|attr| {
-            let attr = attr.meta.require_name_value().unwrap();
-            let path = attr
-                .path
-                .get_ident()
-                .unwrap_or_else(|| {
-                    panic!(
-                        "expected identifier, found `{}`",
-                        attr.path.to_token_stream()
-                    )
-                })
-                .to_string();
-            let value = attr.value.clone();
-            (path, value)
-        })
-        .for_each(|(path, value)| {
-            meta.entry(path)
-                .and_modify(|v: &mut Expr| panic!("duplicate attribute `{}`", v.to_token_stream()))
-                .or_insert(value);
-        });
-
-    for (path, value) in meta {
-        match path.as_str() {
-            "data_folder" => {
-                data_folder = quote! { ::std::string::String::from(#value) };
-            }
-            "handler" => {
-                handler = quote! { #value };
-            }
-            _ => panic!("unexpected attribute `{}`", path),
-        }
-    }
 
     let result = quote! {
         mod __chocho_private {

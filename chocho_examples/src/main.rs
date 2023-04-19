@@ -41,8 +41,7 @@ impl PartlyHandler for Handler {
     }
 }
 
-#[chocho::main]
-#[handler = Handler]
+#[chocho::main(handler = Handler)]
 async fn main(client: Arc<Client>) {
     let account_info = client.account_info.read().await;
     println!("{:?}", account_info);
