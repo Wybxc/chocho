@@ -1,21 +1,48 @@
+//! # chocho
+//!
+//! 一个基于 [ricq](https://docs.rs/ricq) 的 QQ 机器人框架。
+//!
+//! ## Example
+//!
+//! ```rust,no_run
+//! use std::sync::Arc;
+//! use async_trait::async_trait;
+//! use chocho::ricq::{handler::PartlyHandler, Client};
+//!
+//! struct Handler;
+//! #[async_trait]
+//! impl PartlyHandler for Handler {
+//!     async fn handle_login(&self, uin: i64) {
+//!         tracing::info!("登录成功: {}", uin);
+//!     }
+//! }
+//!
+//! #[chocho::main(handler = Handler)]
+//! async fn main(client: Arc<Client>) {
+//!     let account_info = client.account_info.read().await;
+//!     tracing::info!("{:?}", account_info);
+//! }
+//! ```
+#![deny(missing_docs)]
+
 use std::sync::Arc;
 
 use anyhow::Result;
 use login::AliveHandle;
 use requestty::Question;
-use ricq::{
-    handler::{ Handler},
-    Client,
-};
+use ricq::{handler::Handler, Client};
 
 mod device;
 mod login;
 mod utils;
 
 pub use chocho_macros::main;
+#[doc(hidden)]
 pub use ricq;
+#[doc(hidden)]
 pub use tokio;
 
+#[doc(hidden)]
 pub async fn init(
     data_folder: String,
     handler: impl Handler + 'static + Send + Sync,

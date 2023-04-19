@@ -1,7 +1,58 @@
+//! # chocho_macros
+//!
+//! [chocho](https://github.com/Wybxc/chocho) 的过程宏支持。
+#![deny(missing_docs)]
+
 use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{meta::ParseNestedMeta, parse_macro_input, Expr, ItemFn};
 
+/// 声明 `chocho` 的主函数。
+///
+/// 主函数的签名为：
+/// ```rust,ignore
+/// #[chocho::main]
+/// async fn main(client: Arc<Client>) {
+///    // ...
+/// }
+/// ```
+///
+/// 该函数会在 `chocho` 启动并登录成功后被调用。
+///
+/// 主函数执行完成后，`chocho` 接管程序生命周期，开始自动断线重连，接受并处理事件。
+///
+/// # Attributes
+/// - `data_folder`：指定 `chocho` 的数据文件夹路径。默认为 `./bots`。
+/// - `handler`：指定 `chocho` 的事件处理器。默认为 `chocho::ricq::handler::DefaultHandler`。
+///
+/// 可以用以下语法指定属性：
+/// ```rust,ignore
+/// #[chocho::main(data_folder = "./data", handler = MyHandler)]
+/// async fn main(client: Arc<Client>) {
+///     // ...
+/// }
+/// ```
+///
+/// 或者
+///
+/// ```rust,ignore
+/// #[chocho::main]
+/// #[chocho(data_folder = "./data", handler = MyHandler)]
+/// async fn main(client: Arc<Client>) {
+///     // ...
+/// }
+/// ```
+///
+/// 或者
+///
+/// ```rust,ignore
+/// #[chocho::main]
+/// #[chocho(data_folder = "./data")]
+/// #[chocho(handler = MyHandler)]
+/// async fn main(client: Arc<Client>) {
+///     // ...
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
     let ItemFn {

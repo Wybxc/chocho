@@ -27,21 +27,11 @@ use crate::utils::retry;
 ///
 /// | 协议 | 说明 |
 /// | --- | --- |
-/// | [`Protocol::IPad`] | iPad 协议 |
-/// | [`Protocol::AndroidPhone`] | Android 手机协议 |
-/// | [`Protocol::AndroidWatch`] | Android 手表协议 |
-/// | [`Protocol::MacOS`] | MacOS 客户端协议 |
-/// | [`Protocol::QiDian`] | 企点协议 |
-///
-/// # Python
-/// ```python
-/// class Protocol(Enum):
-///     IPAD = enum.auto()
-///     ANDROID_PHONE = enum.auto()
-///     ANDROID_WATCH = enum.auto()
-///     MAC_OS = enum.auto()
-///     QI_DIAN = enum.auto()
-/// ```
+/// | `Protocol::IPad` | iPad 协议 |
+/// | `Protocol::AndroidPhone` | Android 手机协议 |
+/// | `Protocol::AndroidWatch` | Android 手表协议 |
+/// | `Protocol::MacOS` | MacOS 客户端协议 |
+/// | `Protocol::QiDian` | 企点协议 |
 pub use ricq::Protocol;
 
 /// 登录保持。
