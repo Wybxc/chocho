@@ -13,6 +13,7 @@ ricq = { version = "0.1.20", features = ["image-detail"] }
 ricq-core= { version = "0.1.20" }
 
 anyhow = "1.0.70"
+async-trait = "0.1.68"
 bytes = "1.4.0"
 futures-util = "0.3.28"
 hex = "0.4.3"

@@ -1,10 +1,9 @@
 use async_trait::async_trait;
+use chocho::prelude::*;
 use chocho::ricq::{
     client::event::{FriendMessageEvent, GroupMessageEvent},
     handler::PartlyHandler,
-    Client,
 };
-use std::sync::Arc;
 
 struct Handler;
 
@@ -23,4 +22,4 @@ impl PartlyHandler for Handler {
 }
 
 #[chocho::main(handler = Handler)]
-async fn main(_: Arc<Client>) {}
+async fn main(_: RQClient) {}
