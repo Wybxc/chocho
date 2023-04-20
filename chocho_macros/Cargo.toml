@@ -10,6 +10,8 @@ repository = "https://github.com/Wybxc/chocho"
 quote = "1.0.26"
 syn = "2.0.15"
 
-
 [lib]
 proc-macro = true
+
+[dev-dependencies]
+chocho = { path = "../chocho" }

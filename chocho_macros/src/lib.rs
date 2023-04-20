@@ -10,46 +10,64 @@ use syn::{meta::ParseNestedMeta, parse_macro_input, Expr, ItemFn};
 /// 声明 `chocho` 的主函数。
 ///
 /// 主函数的签名为：
-/// ```rust,ignore
+///
+/// ```,no_run
+/// # use chocho::prelude::*;
 /// #[chocho::main]
-/// async fn main(client: Arc<Client>) {
-///    // ...
+/// async fn main(client: RQClient) {
+///     // ...
 /// }
 /// ```
 ///
 /// 该函数会在 `chocho` 启动并登录成功后被调用。
 ///
-/// 主函数执行完成后，`chocho` 接管程序生命周期，开始自动断线重连，接受并处理事件。
+/// # 生命周期
+///
+/// `chocho` 的生命周期分为三个阶段：
+///
+/// 1. 初始化 `tracing-subscriber` 的日志输出，登录账号；
+/// 2. 执行主函数。
+/// 3. 开始自动断线重连。
 ///
 /// # Attributes
+///
 /// - `data_folder`：指定 `chocho` 的数据文件夹路径。默认为 `./bots`。
 /// - `handler`：指定 `chocho` 的事件处理器。默认为 `chocho::ricq::handler::DefaultHandler`。
 ///
 /// 可以用以下语法指定属性：
-/// ```rust,ignore
+/// ```,no_run
+/// # use chocho::prelude::*;
+/// # struct MyHandler;
+/// # impl chocho::ricq::handler::PartlyHandler for MyHandler {}
 /// #[chocho::main(data_folder = "./data", handler = MyHandler)]
-/// async fn main(client: Arc<Client>) {
+/// async fn main(client: RQClient) {
 ///     // ...
 /// }
 /// ```
 ///
 /// 或者
 ///
-/// ```rust,ignore
+/// ```,no_run
+/// # use chocho::prelude::*;
+/// # struct MyHandler;
+/// # impl chocho::ricq::handler::PartlyHandler for MyHandler {}
 /// #[chocho::main]
 /// #[chocho(data_folder = "./data", handler = MyHandler)]
-/// async fn main(client: Arc<Client>) {
+/// async fn main(client: RQClient) {
 ///     // ...
 /// }
 /// ```
 ///
 /// 或者
 ///
-/// ```rust,ignore
+/// ```,no_run
+/// # use chocho::prelude::*;
+/// # struct MyHandler;
+/// # impl chocho::ricq::handler::PartlyHandler for MyHandler {}
 /// #[chocho::main]
 /// #[chocho(data_folder = "./data")]
 /// #[chocho(handler = MyHandler)]
-/// async fn main(client: Arc<Client>) {
+/// async fn main(client: RQClient) {
 ///     // ...
 /// }
 /// ```
@@ -144,12 +162,14 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
             }
         }
 
+        #[allow(unreachable_code)]
         fn main() -> impl ::std::process::Termination {
             __chocho_private::run(async {
                 async fn #ident(#args) #output {
                     #block
                 }
-                let (client, alive) = ::chocho::init(#data_folder, #handler, #uin, #login_method).await?;
+                ::chocho::tracing_subscriber::fmt::init();
+                let (client, alive) = ::chocho::login(#data_folder, #handler, #uin, #login_method).await?;
                 let result = __chocho_private::Wrap::wrap(#ident(client).await)?;
                 alive.auto_reconnect().await?;
                 Ok(result)

@@ -8,6 +8,7 @@ repository = "https://github.com/Wybxc/chocho"
 
 [dependencies]
 chocho_macros = { path = "../chocho_macros", version = "0.1.0" }
+chocho_login = { path = "../chocho_login", version = "0.1.0" }
 
 ricq = { version = "0.1.20", features = ["image-detail"] }
 ricq-core= { version = "0.1.20" }

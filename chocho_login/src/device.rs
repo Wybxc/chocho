@@ -1,4 +1,55 @@
 //! 解析和生成 `device.json`。
+//!
+//! # Examples
+//!
+//! ```
+//! use chocho_login::device::{from_json, random_from_uin};
+//!
+//! # fn main() -> anyhow::Result<()> {
+//! let json = r#"{
+//!     "deviceInfoVersion": 2,
+//!     "data": {
+//!         "display": "ROG Phone 3",
+//!         "product": "ASUS_I003DD",
+//!         "device": "ASUS_I003DD",
+//!         "board": "sm8250",
+//!         "model": "ASUS_I003DD",
+//!         "fingerPrint": "google/redfin/redfin:11/RQ3A.210805.001.A1/7474174:user/release-keys",
+//!         "bootId": "a7d7-0a00-0a00-0a00-000000000000",
+//!         "procVersion": "Linux version 4.14.117-perf+ (hudsoncm@ilclbld72) (gcc version 4.9.x 20150123 (prerelease) (GCC)) #1 SMP PREEMPT Wed Jul 28 22:02:56 CST 2021",
+//!         "brand": "asus",
+//!         "bootloader": "PRB_A0_2005_10",
+//!         "baseBand": "M3.0.50.1.31",
+//!         "version": "11",
+//!         "simInfo": "0",
+//!         "osType": "android",
+//!         "macAddress": "02:00:00:00:00:00",
+//!         "ipAddress": "0a000103",
+//!         "wifiBSSID": "02:00:00:00:00:00",
+//!         "wifiSSID": "SSID",
+//!         "imei": "280496984206895",
+//!         "imsiMd5": "3e20e2c552e4a01c43cd7c802310b778",
+//!         "androidId": "e55745001ab98456",
+//!         "apn": "wifi",
+//!         "vendorName": "asus",
+//!         "vendorOsName": "WW",
+//!         "version": {
+//!             "codename": "REL",
+//!             "incremental": "5891938",
+//!             "release": "10",
+//!             "sdk": 29
+//!         }
+//!     }
+//! }"#;
+//!
+//! let fallback = random_from_uin(123456789);
+//! let device = from_json(json, &fallback)?;
+//! assert_eq!(device.display, "ROG Phone 3");
+//! assert_eq!(device.product, "ASUS_I003DD");
+//! # Ok(())
+//! # }
+//! ```
+//!
 
 use anyhow::{anyhow, bail, Result};
 use rand::SeedableRng;
@@ -50,9 +101,22 @@ macro_rules! parse {
 /// `device.json` 采用 **mirai 的格式**，与 ricq 的直接定义不兼容。
 ///
 /// # Arguments
-/// - `json` - `device.json` 的内容。
-/// - `fallback` - 某一项不存在时的默认值。
-pub(crate) fn from_json(json: &str, fallback: &Device) -> Result<Device> {
+///
+/// * `json` - `device.json` 的内容。
+/// * `fallback` - 某一项不存在时的默认值。
+///
+/// # Examples
+///
+/// ```no_run
+/// # async fn _f() -> anyhow::Result<()> {
+/// let json = tokio::fs::read_to_string("device.json").await?;
+/// let fallback = chocho_login::device::random_from_uin(123456789);
+/// let device = chocho_login::device::from_json(&json, &fallback)?;
+/// println!("{:?}", device);
+/// # Ok(())
+/// # }
+/// ```
+pub fn from_json(json: &str, fallback: &Device) -> Result<Device> {
     let json: Value = serde_json::from_str(json)?;
     let json = json
         .as_object()
@@ -80,7 +144,16 @@ pub(crate) fn from_json(json: &str, fallback: &Device) -> Result<Device> {
 }
 
 /// 以 QQ 号为种子生成随机的设备信息。
-pub(crate) fn random_from_uin(uin: i64) -> Device {
+///
+/// 使用 `rand_chacha` 作为随机数生成器，因此可以保证相同的 QQ 号生成的设备信息相同。
+///
+/// # Examples
+///
+/// ```
+/// let device = chocho_login::device::random_from_uin(123456789);
+/// assert_eq!(device.display, "RICQ.110281.001");
+/// ```
+pub fn random_from_uin(uin: i64) -> Device {
     let mut seed = ChaCha8Rng::seed_from_u64(uin as u64);
     Device::random_with_rng(&mut seed)
 }
