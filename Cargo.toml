@@ -1,5 +1,11 @@
 [workspace]
-members = ["chocho", "chocho_login", "chocho_macros", "chocho_examples"]
+members = [
+    "chocho",
+    "chocho_login",
+    "chocho_msg",
+    "chocho_macros",
+    "chocho_examples",
+]
 
 [patch.crates-io]
 ricq = { git = "https://github.com/Wybxc/ricq.git", branch = "chocho-patch" }

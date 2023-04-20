@@ -7,6 +7,5 @@
 //! ```
 
 pub use crate::client::{ClientExt, RQClient};
-pub use crate::msg::Message;
-pub use ricq::msg::elem::RQElem;
+pub use chocho_msg::{Message, RQElem};
 pub use ricq::RQResult;

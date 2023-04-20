@@ -27,7 +27,6 @@
 #![deny(missing_docs)]
 
 pub mod client;
-pub mod msg;
 pub mod prelude;
 
 pub use chocho_login::{login, LoginMethod, Protocol};

@@ -1,0 +1,13 @@
+[package]
+name = "chocho_msg"
+version = "0.1.0"
+edition = "2021"
+description = "QQ client framework"
+license = "MPL-2.0"
+repository = "https://github.com/Wybxc/chocho"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ricq = { version = "0.1.20", features = ["image-detail"] }
+ricq-core= { version = "0.1.20" }

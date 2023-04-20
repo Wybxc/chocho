@@ -18,7 +18,7 @@ use ricq::{
 };
 use std::sync::Arc;
 
-use crate::msg::Message;
+use chocho_msg::Message;
 
 /// `ricq` 客户端的别名。
 pub type RQClient = Arc<Client>;
