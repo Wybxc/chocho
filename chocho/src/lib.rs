@@ -5,9 +5,10 @@
 //! ## Example
 //!
 //! ```rust,no_run
-//! use std::sync::Arc;
+//! use chocho::prelude::*;
+//!
 //! use async_trait::async_trait;
-//! use chocho::ricq::{handler::PartlyHandler, Client};
+//! use chocho::ricq::{handler::PartlyHandler};
 //!
 //! struct Handler;
 //! #[async_trait]
@@ -18,7 +19,7 @@
 //! }
 //!
 //! #[chocho::main(handler = Handler)]
-//! async fn main(client: Arc<Client>) {
+//! async fn main(client: RQClient) {
 //!     let account_info = client.account_info.read().await;
 //!     tracing::info!("{:?}", account_info);
 //! }
@@ -32,9 +33,11 @@ use login::AliveHandle;
 use requestty::Question;
 use ricq::{handler::Handler, Client};
 
+pub mod client;
 mod device;
 mod login;
 pub mod msg;
+pub mod prelude;
 mod utils;
 
 pub use chocho_macros::main;
@@ -42,9 +45,6 @@ pub use chocho_macros::main;
 pub use ricq;
 #[doc(hidden)]
 pub use tokio;
-
-pub use msg::Message;
-pub use ricq::msg::elem::RQElem;
 
 /// 登录方式。
 pub enum LoginMethod {

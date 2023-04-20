@@ -1,8 +1,6 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
-use chocho::ricq::{client::event::FriendMessageEvent, handler::PartlyHandler, Client};
-use chocho::{Message, RQElem};
+use chocho::prelude::*;
+use chocho::ricq::{client::event::FriendMessageEvent, handler::PartlyHandler};
 
 struct Handler;
 
@@ -27,10 +25,7 @@ impl PartlyHandler for Handler {
 
         if message.trim() == "你好" {
             let response = Message::from("你好".to_string());
-            if let Err(e) = client
-                .send_friend_message(inner.from_uin, response.into())
-                .await
-            {
+            if let Err(e) = client.friend(inner.from_uin).send(response).await {
                 tracing::error!("发送消息失败: {}", e);
             }
         }
@@ -38,7 +33,7 @@ impl PartlyHandler for Handler {
 }
 
 #[chocho::main(handler = Handler)]
-async fn main(client: Arc<Client>) {
+async fn main(client: RQClient) {
     let account_info = client.account_info.read().await;
     println!("{:?}", account_info);
 }
