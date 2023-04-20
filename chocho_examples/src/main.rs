@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use chocho::ricq::{
-    client::event::FriendMessageEvent, handler::PartlyHandler, msg::MessageChainBuilder, Client,
-};
+use chocho::ricq::{client::event::FriendMessageEvent, handler::PartlyHandler, Client};
+use chocho::{Message, RQElem};
 
 struct Handler;
 
@@ -16,25 +15,22 @@ impl PartlyHandler for Handler {
         &self,
         FriendMessageEvent { client, inner }: FriendMessageEvent,
     ) {
-        let message = inner
-            .elements
-            .into_iter()
-            .filter_map(|e| {
-                if let chocho::ricq::msg::elem::RQElem::Text(t) = e {
-                    Some(t.to_string())
-                } else {
-                    None
-                }
+        let message: Message = inner.elements.into();
+        let message = message
+            .into_elems()
+            .filter_map(|elem| match elem {
+                RQElem::Text(text) => Some(text.to_string()),
+                _ => None,
             })
-            .collect::<Vec<String>>();
-        let message = message.join("").trim().to_string();
+            .collect::<Vec<_>>()
+            .join("");
 
-        let mut builder = MessageChainBuilder::new();
-        builder.push_str("你好");
-        let response = builder.build();
-
-        if message == "你好" {
-            if let Err(e) = client.send_friend_message(inner.from_uin, response).await {
+        if message.trim() == "你好" {
+            let response = Message::from("你好".to_string());
+            if let Err(e) = client
+                .send_friend_message(inner.from_uin, response.into())
+                .await
+            {
                 tracing::error!("发送消息失败: {}", e);
             }
         }
