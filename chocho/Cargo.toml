@@ -9,6 +9,9 @@ repository = "https://github.com/Wybxc/chocho"
 [dependencies]
 chocho_macros = { path = "../chocho_macros", version = "0.1.0" }
 
+ricq = { version = "0.1.20", features = ["image-detail"] }
+ricq-core= { version = "0.1.20" }
+
 anyhow = "1.0.70"
 bytes = "1.4.0"
 futures-util = "0.3.28"
@@ -18,7 +21,7 @@ qrcode = "0.12.0"
 rand = "0.8.5"
 rand_chacha = "0.3.1"
 requestty = "0.5.0"
-ricq = { version = "0.1.20", features = ["image-detail"] }
+
 rqrr = "0.6.0"
 serde_json = "1.0.96"
 tokio = { version = "1.27.0", features = ["fs", "io-std", "rt-multi-thread"] }

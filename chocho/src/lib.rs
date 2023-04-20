@@ -34,6 +34,7 @@ use ricq::{handler::Handler, Client};
 
 mod device;
 mod login;
+pub mod msg;
 mod utils;
 
 pub use chocho_macros::main;
@@ -41,6 +42,9 @@ pub use chocho_macros::main;
 pub use ricq;
 #[doc(hidden)]
 pub use tokio;
+
+pub use msg::Message;
+pub use ricq::msg::elem::RQElem;
 
 /// 登录方式。
 pub enum LoginMethod {

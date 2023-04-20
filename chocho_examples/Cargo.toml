@@ -14,3 +14,6 @@ tokio = { version = "1.27.0", features = ["fs"] }
 
 [[bin]]
 name = "notify"
+
+[[bin]]
+name = "orig_msg"

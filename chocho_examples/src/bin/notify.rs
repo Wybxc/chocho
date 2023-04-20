@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use chocho::ricq::{msg::MessageChainBuilder, Client};
+use chocho::{ricq::Client, Message};
 
 #[chocho::main]
 #[chocho(uin = std::env::var("CHOCHO_NOTIFY_UIN")?.parse()?)]
@@ -12,10 +12,8 @@ async fn main(client: Arc<Client>) -> Result<()> {
     let target: i64 = std::env::var("CHOCHO_NOTIFY_TARGET")?.parse()?;
 
     let content = chocho::tokio::fs::read_to_string(&notify).await?;
-    let mut builder = MessageChainBuilder::new();
-    builder.push_str(&content);
-    let message = builder.build();
-    client.send_friend_message(target, message).await?;
+    let message = Message::from(content);
+    client.send_friend_message(target, message.into()).await?;
 
     std::process::exit(0);
 }
