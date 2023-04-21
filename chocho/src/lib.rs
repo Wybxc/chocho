@@ -8,7 +8,7 @@
 //! use chocho::prelude::*;
 //!
 //! use async_trait::async_trait;
-//! use chocho::ricq::{handler::PartlyHandler};
+//! use chocho::ricq::handler::PartlyHandler;
 //!
 //! struct Handler;
 //! #[async_trait]

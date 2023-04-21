@@ -6,8 +6,10 @@ QQ 机器人快速开发框架。
 
 ```rust
 use chocho::prelude::*;
+
 use async_trait::async_trait;
-use chocho::ricq::{handler::PartlyHandler};
+use chocho::ricq::handler::PartlyHandler;
+
 struct Handler;
 #[async_trait]
 impl PartlyHandler for Handler {
@@ -15,6 +17,7 @@ impl PartlyHandler for Handler {
         tracing::info!("登录成功: {}", uin);
     }
 }
+
 #[chocho::main(handler = Handler)]
 async fn main(client: RQClient) {
     let account_info = client.account_info.read().await;
