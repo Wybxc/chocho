@@ -22,5 +22,5 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
-      - run: cargo install cargo-checkmate
+      - run: which cargo-checkmate || cargo install cargo-checkmate
       - run: cargo-checkmate
