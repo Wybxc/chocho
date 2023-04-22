@@ -1,6 +1,8 @@
-//! 客户端模块，提供了用于处理事件的客户端和客户端扩展方法。
+//! 好友操作。
 //!
-//! # Examples
+//! `Friend` 是一个好友操作对象，提供了发送消息、发送语音、撤回消息、戳一戳、删除好友等操作。
+//!
+//! # Example
 //!
 //! ```no_run
 //! use chocho::prelude::*;
@@ -11,35 +13,19 @@
 //!     Ok(())
 //! }
 //! ```
-
 use ricq::{
-    structs::{FriendAudio, MessageReceipt},
+    structs::{FriendAudio, LinkShare, MessageReceipt, MusicShare, MusicVersion},
     Client, RQResult,
 };
-use std::sync::Arc;
 
-use chocho_msg::Message;
-
-/// `ricq` 客户端的别名。
-pub type RQClient = Arc<Client>;
-
-/// 客户端扩展方法。
-#[async_trait::async_trait]
-pub trait ClientExt {
-    /// 进行好友操作。
-    fn friend(&self, uin: i64) -> Friend;
-}
-
-impl ClientExt for Client {
-    fn friend(&self, uin: i64) -> Friend {
-        Friend { client: self, uin }
-    }
-}
+use chocho_msg::{elem::FriendImage, Message};
 
 /// 好友操作对象。
 pub struct Friend<'a> {
-    client: &'a Client,
-    uin: i64,
+    /// 客户端引用。
+    pub client: &'a Client,
+    /// 好友 QQ 号。
+    pub uin: i64,
 }
 
 impl<'a> Friend<'a> {
@@ -58,6 +44,25 @@ impl<'a> Friend<'a> {
     pub async fn recall(&self, receipt: MessageReceipt) -> RQResult<()> {
         self.client
             .recall_friend_message(self.uin, receipt.time, receipt.seqs, receipt.rands)
+            .await
+    }
+
+    /// 上传图片。
+    pub async fn upload_image(&self, image: impl AsRef<[u8]>) -> RQResult<FriendImage> {
+        self.client
+            .upload_friend_image(self.uin, image.as_ref())
+            .await
+    }
+
+    /// 发送链接分享。
+    pub async fn share_link(&self, link: LinkShare) -> RQResult<()> {
+        self.client.send_friend_link_share(self.uin, link).await
+    }
+
+    /// 发送音乐分享。
+    pub async fn share_music(&self, share: MusicShare, version: MusicVersion) -> RQResult<()> {
+        self.client
+            .send_friend_music_share(self.uin, share, version)
             .await
     }
 

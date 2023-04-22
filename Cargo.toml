@@ -3,6 +3,7 @@ members = [
     "chocho",
     "chocho_login",
     "chocho_msg",
+    "chocho_client",
     "chocho_macros",
     "chocho_examples",
 ]

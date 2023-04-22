@@ -169,9 +169,15 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
                     #block
                 }
                 ::chocho::tracing_subscriber::fmt::init();
+                ::chocho::tokio::spawn(async {
+                    ::chocho::tokio::signal::ctrl_c().await.unwrap();
+                    ::chocho::lifespan::do_finalize().await;
+                    ::std::process::exit(0);
+                });
                 let (client, alive) = ::chocho::login(#data_folder, #handler, #uin, #login_method).await?;
                 let result = __chocho_private::Wrap::wrap(#ident(client).await)?;
                 alive.auto_reconnect().await?;
+                ::chocho::lifespan::do_finalize().await;
                 Ok(result)
             })
         }

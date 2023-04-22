@@ -10,10 +10,18 @@ anyhow = "1.0.70"
 async-trait = "0.1.68"
 chocho = { path = "../chocho" }
 tracing = "0.1.37"
-tokio = { version = "1.27.0", features = ["fs"] }
+tokio = { version = "1.27.0", features = ["fs", "process"] }
+reqwest = { version = "0.11.16", features = ["json"] }
+serde_json = "1.0.96"
 
 [[bin]]
 name = "notify"
 
 [[bin]]
 name = "orig_msg"
+
+[[bin]]
+name = "view_msg"
+
+[[bin]]
+name = "music"

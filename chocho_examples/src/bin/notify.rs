@@ -1,3 +1,6 @@
+//! 向本地好友发送消息，然后退出。
+//!
+//! 通过环境变量读取账号信息，在 token 未过期的情况下，可以直接运行。
 use anyhow::Result;
 
 use chocho::prelude::*;

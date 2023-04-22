@@ -50,7 +50,7 @@ pub use crate::qrcode::login_with_qrcode;
 /// | `Protocol::AndroidWatch` | Android 手表协议 |
 /// | `Protocol::MacOS` | MacOS 客户端协议 |
 /// | `Protocol::QiDian` | 企点协议 |
-pub use ricq::Protocol;
+pub use ricq::Protocol as RQProtocol;
 
 /// 登录保持。
 ///
@@ -147,7 +147,7 @@ pub enum LoginMethod {
     /// 密码登录。
     Password {
         /// 客户端协议。
-        protocol: Protocol,
+        protocol: RQProtocol,
         /// 密码。
         password: String,
     },
@@ -214,11 +214,11 @@ pub async fn login(
                     .unwrap()
                     .index;
                 let protocol = match protocol {
-                    0 => Protocol::IPad,
-                    1 => Protocol::AndroidPhone,
-                    2 => Protocol::AndroidWatch,
-                    3 => Protocol::MacOS,
-                    4 => Protocol::QiDian,
+                    0 => RQProtocol::IPad,
+                    1 => RQProtocol::AndroidPhone,
+                    2 => RQProtocol::AndroidWatch,
+                    3 => RQProtocol::MacOS,
+                    4 => RQProtocol::QiDian,
                     _ => unreachable!(),
                 };
 

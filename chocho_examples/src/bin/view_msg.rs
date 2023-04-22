@@ -1,4 +1,4 @@
-//! 查看消息原始组成，调试用。
+//! 查看消息解析后的数据结构，调试用。
 use async_trait::async_trait;
 use chocho::prelude::*;
 use chocho::ricq::{
@@ -11,14 +11,14 @@ struct Handler;
 #[async_trait]
 impl PartlyHandler for Handler {
     async fn handle_group_message(&self, ev: GroupMessageEvent) {
-        let elems = ev.inner.elements.0;
+        let msg: Message = ev.inner.elements.into();
         println!("Group Message");
-        println!("{:?}", elems);
+        println!("{:?}", msg.into_elems().collect::<Vec<_>>());
     }
     async fn handle_friend_message(&self, ev: FriendMessageEvent) {
-        let elems = ev.inner.elements.0;
+        let msg: Message = ev.inner.elements.into();
         println!("Friend Message");
-        println!("{:?}", elems);
+        println!("{:?}", msg.into_elems().collect::<Vec<_>>());
     }
 }
 

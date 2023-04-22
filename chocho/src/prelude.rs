@@ -6,6 +6,5 @@
 //! use chocho::prelude::*;
 //! ```
 
-pub use crate::client::{ClientExt, RQClient};
-pub use chocho_msg::{Message, RQElem};
+pub use crate::{ClientExt, Message, RQClient, RQElem};
 pub use ricq::RQResult;
