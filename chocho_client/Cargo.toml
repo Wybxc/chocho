@@ -10,6 +10,8 @@ chocho_msg = { path = "../chocho_msg", version = "0.1.0" }
 async-trait = "0.1.68"
 
 ricq = { version = "0.1.20", features = ["image-detail"] }
+ricq-core = { version = "0.1.20" }
 
 [dev-dependencies]
 chocho = { path = "../chocho", version = "0.1.0" }
+anyhow = "1.0.70"

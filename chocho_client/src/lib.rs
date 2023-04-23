@@ -16,8 +16,11 @@
 #![deny(missing_docs)]
 
 pub mod friend;
+pub mod group;
+pub mod structs;
 
 use friend::Friend;
+use group::Group;
 
 /// `ricq` 客户端的别名。
 pub type RQClient = std::sync::Arc<ricq::Client>;
@@ -27,10 +30,20 @@ pub type RQClient = std::sync::Arc<ricq::Client>;
 pub trait ClientExt {
     /// 进行好友操作。
     fn friend(&self, uin: i64) -> Friend;
+
+    /// 进行群操作。
+    fn group(&self, uin: i64) -> Group;
 }
 
 impl ClientExt for ricq::Client {
     fn friend(&self, uin: i64) -> Friend {
         Friend { client: self, uin }
+    }
+
+    fn group(&self, uin: i64) -> Group {
+        Group {
+            client: self,
+            code: uin,
+        }
     }
 }

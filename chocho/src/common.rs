@@ -58,3 +58,19 @@ pub use ricq::structs::MusicShare;
 /// # }
 /// ```
 pub use ricq::structs::MusicVersion;
+
+/// 音频编码。
+///
+/// # Examples
+///
+/// ```
+/// # use chocho::prelude::*;
+/// # async fn test(client: RQClient) -> anyhow::Result<()> {
+/// let codec = chocho::common::AudioCodeC::Amr;
+/// let group = client.group(12345678);
+/// let audio = group.upload_audio("你好".to_string(), codec).await?;
+/// group.send_audio(audio).await?;
+/// # Ok(())
+/// # }
+/// ```
+pub use chocho_client::structs::AudioCodeC;

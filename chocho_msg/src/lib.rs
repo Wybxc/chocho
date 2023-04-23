@@ -164,6 +164,20 @@ impl Message {
         }
         self
     }
+
+    /// 是否是长消息（含有多张图片的群聊消息）。
+    pub fn is_long(&self) -> bool {
+        let mut count = 0;
+        for elem in &self.orig_elems {
+            if let OriginMessageElement::CustomFace(_) = elem {
+                count += 1;
+                if count >= 2 {
+                    return true;
+                }
+            }
+        }
+        false
+    }
 }
 
 impl From<Message> for ricq::msg::MessageChain {
@@ -223,6 +237,17 @@ where
             result.push(elem);
         }
         result
+    }
+}
+
+impl<E> Extend<E> for Message
+where
+    RQElem: From<E>,
+{
+    fn extend<T: IntoIterator<Item = E>>(&mut self, iter: T) {
+        for elem in iter {
+            self.push(elem);
+        }
     }
 }
 
