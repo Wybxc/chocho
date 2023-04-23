@@ -54,7 +54,7 @@ impl<'a> Friend<'a> {
     }
 
     /// 获取语音下载链接。
-    pub async fn get_audio_url(&self, audio: FriendAudio) -> RQResult<String> {
+    pub async fn get_audio_download_url(&self, audio: FriendAudio) -> RQResult<String> {
         self.client.get_friend_audio_url(self.uin, audio).await
     }
 
