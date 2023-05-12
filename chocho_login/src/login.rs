@@ -134,10 +134,9 @@ pub(crate) async fn reconnect(
     client: &Arc<ricq::Client>,
     account_data_folder: &Path,
 ) -> Result<JoinHandle<()>> {
-    retry(
-        10,
-        || async {
-            // 如果不是网络原因掉线，不重连（服务端强制下线/被踢下线/用户手动停止）
+    let mut retry_count = 10;
+    loop {
+        match try {
             if client.get_status() != (NetworkStatus::NetworkOffline as u8) {
                 bail!("客户端因非网络原因下线，不再重连");
             }
@@ -176,34 +175,16 @@ pub(crate) async fn reconnect(
             after_login(client).await;
 
             tracing::info!("客户端重连成功");
-            Ok(Ok(alive))
-        },
-        |e, c| async move {
-            tracing::error!("客户端重连失败，原因：{}，剩余尝试 {} 次", e, c);
-        },
-    )
-    .await?
-}
 
-/// 自动重试直到得到 `Ok(..)`。
-pub async fn retry<F, T, D, E>(
-    mut max_count: usize,
-    mut f: impl FnMut() -> F,
-    mut on_retry: impl FnMut(E, usize) -> D,
-) -> Result<T, E>
-where
-    F: Future<Output = Result<T, E>>,
-    D: Future<Output = ()>,
-{
-    loop {
-        match f().await {
+            alive
+        } {
             Ok(t) => return Ok(t),
             Err(e) => {
-                if max_count == 0 {
+                if retry_count == 0 {
                     return Err(e);
                 }
-                max_count -= 1;
-                on_retry(e, max_count).await;
+                retry_count -= 1;
+                tracing::error!("客户端重连失败，原因：{}，剩余尝试 {} 次", e, retry_count);
                 tokio::task::yield_now().await;
             }
         }

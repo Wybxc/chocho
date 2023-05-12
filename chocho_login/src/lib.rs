@@ -25,6 +25,7 @@
 
 #![deny(missing_docs)]
 #![feature(never_type)]
+#![feature(try_blocks)]
 
 use anyhow::Result;
 use login::reconnect;
