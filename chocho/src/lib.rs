@@ -31,7 +31,7 @@ pub mod lifespan;
 pub mod prelude;
 
 pub use chocho_client::{ClientExt, RQClient};
-pub use chocho_login::{login, LoginMethod, RQProtocol};
+pub use chocho_login::{login, LoginMethod, QSignClient, RQProtocol};
 pub use chocho_macros::main;
 pub use chocho_msg::{Message, RQElem};
 pub use lifespan::finalizer;

@@ -4,6 +4,7 @@ use std::{path::Path, sync::Arc};
 
 use anyhow::{bail, Result};
 use futures_util::StreamExt;
+use ricq::qsign::QSignClient;
 use ricq::{
     handler::Handler, Client, LoginDeviceLocked, LoginNeedCaptcha, LoginResponse, LoginSuccess,
     Protocol,
@@ -30,17 +31,24 @@ use crate::AliveHandle;
 /// # Examples
 ///
 /// ```no_run
-/// use chocho_login::login_with_password;
+/// use std::{time::Duration, sync::Arc};
+/// use chocho_login::{login_with_password, QSignClient};
 /// use ricq::handler::DefaultHandler;
 /// use anyhow::Result;
 ///
 /// #[tokio::main]
 /// async fn main() -> Result<()> {
+///     let qsign_client = Arc::new(QSignClient::new(
+///         "http://localhost:5000".to_string(),
+///         "114514".to_string(),
+///         Duration::from_secs(60),
+///     )?);
 ///     let (client, alive) = login_with_password(
 ///         123456789,
 ///         "password",
 ///         ricq::Protocol::AndroidWatch,
 ///         "./data",
+///         qsign_client,
 ///         DefaultHandler
 ///     ).await?;
 ///     alive.auto_reconnect().await?;
@@ -51,12 +59,14 @@ pub async fn login_with_password(
     password: &str,
     protocol: Protocol,
     data_folder: impl AsRef<Path>,
+    qsign_client: Arc<QSignClient>,
     handler: impl Handler + 'static + Send + Sync,
 ) -> Result<(Arc<Client>, AliveHandle)> {
     login_impl(
         uin,
         protocol,
         data_folder,
+        qsign_client,
         handler,
         move |client| async move { password_login(&client, uin, password).await },
     )
@@ -70,7 +80,8 @@ pub async fn login_with_password(
 /// # Examples
 ///
 /// ```no_run
-/// use chocho_login::password::password_login;
+/// use std::{time::Duration, sync::Arc};
+/// use chocho_login::{password::password_login, QSignClient};
 /// use ricq::handler::DefaultHandler;
 /// use ricq::client::{Connector, DefaultConnector};
 /// use ricq::version::get_version;
@@ -79,7 +90,12 @@ pub async fn login_with_password(
 /// # async fn _f() -> anyhow::Result<()> {
 /// let device = chocho_login::device::random_from_uin(123456789);
 /// let protocol = ricq::Protocol::AndroidWatch;
-/// let client = std::sync::Arc::new(ricq::Client::new(device, get_version(protocol), DefaultHandler));
+/// let qsign_client = Arc::new(QSignClient::new(
+///         "http://localhost:5000".to_string(),
+///         "114514".to_string(),
+///         Duration::from_secs(60),
+///     )?);
+/// let client = std::sync::Arc::new(ricq::Client::new(device, get_version(protocol), qsign_client, DefaultHandler));
 /// let alive = tokio::spawn({
 ///     let client = client.clone();
 ///     let stream = DefaultConnector.connect(&client).await?;

@@ -9,5 +9,5 @@ repository = "https://github.com/Wybxc/chocho"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ricq = { version = "0.1.20", features = ["image-detail"] }
-ricq-core= { version = "0.1.20" }
+ricq = { workspace = true, features = ["image-detail"]  }
+ricq-core = { workspace = true }

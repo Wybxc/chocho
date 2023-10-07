@@ -91,6 +91,13 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut handler = quote! { ::chocho::ricq::handler::DefaultHandler };
     let mut uin = quote! { ::std::option::Option::None };
     let mut login_method = quote! { ::std::option::Option::None };
+    let mut qsign = quote! { || -> ::std::result::Result<::std::sync::Arc<::chocho::QSignClient>, Box<dyn ::std::error::Error>> {
+        Ok(::std::sync::Arc::new(::chocho::QSignClient::new(
+            "http://localhost:11451".to_string(),
+            "114514".to_string(),
+            ::std::time::Duration::from_secs(60),
+        )?))
+    } };
 
     let mut meta_parser = |meta: ParseNestedMeta| {
         if meta.path.is_ident("data_folder") {
@@ -105,6 +112,9 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
         } else if meta.path.is_ident("login_method") {
             let value: Expr = meta.value()?.parse()?;
             login_method = quote! { ::std::option::Option::Some(#value) };
+        } else if meta.path.is_ident("qsign") {
+            let value: Expr = meta.value()?.parse()?;
+            qsign = quote! { #value };
         } else {
             return Err(meta.error(format!(
                 "unexpected attribute `{}`",
@@ -174,7 +184,11 @@ pub fn main(args: TokenStream, input: TokenStream) -> TokenStream {
                     ::chocho::lifespan::do_finalize().await;
                     ::std::process::exit(0);
                 });
-                let (client, alive) = ::chocho::login(#data_folder, #handler, #uin, #login_method).await?;
+                let qsign_client = {
+                    let builder = #qsign;
+                    builder()?
+                };
+                let (client, alive) = ::chocho::login(#data_folder, #handler, #uin, #login_method, qsign_client).await?;
                 let result = __chocho_private::Wrap::wrap(#ident(client).await)?;
                 alive.auto_reconnect().await?;
                 ::chocho::lifespan::do_finalize().await;
