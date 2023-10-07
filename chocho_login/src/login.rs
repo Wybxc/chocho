@@ -4,8 +4,8 @@ use std::future::Future;
 use std::{path::Path, sync::Arc};
 
 use anyhow::{bail, Result};
-
 use ricq::handler::Handler;
+use ricq::qsign::QSignClient;
 use ricq::Protocol;
 use ricq::{
     client::{Client, Connector, DefaultConnector, NetworkStatus, Token},
@@ -21,6 +21,7 @@ pub(crate) async fn login_impl<Fut>(
     uin: i64,
     protocol: Protocol,
     data_folder: impl AsRef<Path>,
+    qsign_client: Arc<QSignClient>,
     handler: impl Handler + 'static + Send + Sync,
     login_with_credential: impl FnOnce(Arc<ricq::Client>) -> Fut,
 ) -> Result<(Arc<Client>, AliveHandle)>
@@ -32,7 +33,7 @@ where
     tokio::fs::create_dir_all(&account_data_folder).await?;
 
     let device = load_device_json(uin, &account_data_folder).await?;
-    let (client, alive) = prepare_client(device, protocol, handler).await?;
+    let (client, alive) = prepare_client(device, protocol, qsign_client, handler).await?;
 
     // 尝试 token 登录
     if !try_token_login(&client, &account_data_folder).await? {
@@ -74,9 +75,15 @@ async fn load_device_json(uin: i64, data_folder: impl AsRef<Path>) -> Result<Dev
 async fn prepare_client(
     device: Device,
     protocol: Protocol,
+    qsign_client: Arc<QSignClient>,
     handler: impl Handler + 'static + Send + Sync,
 ) -> tokio::io::Result<(Arc<ricq::Client>, JoinHandle<()>)> {
-    let client = Arc::new(ricq::Client::new(device, get_version(protocol), handler));
+    let client = Arc::new(ricq::Client::new(
+        device,
+        get_version(protocol),
+        qsign_client,
+        handler,
+    ));
     let alive = tokio::spawn({
         let client = client.clone();
         // 连接最快的服务器

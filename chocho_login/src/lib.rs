@@ -8,13 +8,19 @@
 //! ## Examples
 //!
 //! ```no_run
-//! use chocho_login::login;
+//! use std::{time::Duration, sync::Arc};
+//! use chocho_login::{login, QSignClient};
 //! use ricq::handler::DefaultHandler;
 //! use anyhow::Result;
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<()> {
-//!     let (client, alive) = login("./data".to_string(), DefaultHandler, None, None).await?;
+//!     let qsign_client = Arc::new(QSignClient::new(
+//!         "http://localhost:5000".to_string(),
+//!         "114514".to_string(),
+//!         Duration::from_secs(60),
+//!     )?);
+//!     let (client, alive) = login("./data".to_string(), DefaultHandler, None, None, qsign_client).await?;
 //!     alive.auto_reconnect().await?;
 //! }
 //! ```
@@ -41,6 +47,7 @@ pub mod qrcode;
 
 pub use crate::password::login_with_password;
 pub use crate::qrcode::login_with_qrcode;
+pub use ricq::qsign::QSignClient;
 
 /// 协议。
 ///
@@ -122,13 +129,19 @@ impl AliveHandle {
     /// # Examples
     ///
     /// ```no_run
-    /// use chocho_login::login;
+    /// use std::{time::Duration, sync::Arc};
+    /// use chocho_login::{login, QSignClient};
     /// use ricq::handler::DefaultHandler;
     /// use anyhow::Result;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<()> {
-    ///     let (client, alive) = login("./data".to_string(), DefaultHandler, None, None).await?;
+    ///     let qsign_client = Arc::new(QSignClient::new(
+    ///         "http://localhost:5000".to_string(),
+    ///         "114514".to_string(),
+    ///         Duration::from_secs(60),
+    ///     )?);
+    ///     let (client, alive) = login("./data".to_string(), DefaultHandler, None, None, qsign_client).await?;
     ///     alive.auto_reconnect().await?;
     /// }
     /// ```
@@ -176,6 +189,7 @@ pub async fn login(
     handler: impl Handler + 'static + Send + Sync,
     uin: Option<i64>,
     login_method: Option<LoginMethod>,
+    qsign_client: Arc<QSignClient>,
 ) -> Result<(Arc<Client>, AliveHandle)> {
     use requestty::Question;
 
@@ -241,7 +255,7 @@ pub async fn login(
 
     match login_method {
         LoginMethod::Password { protocol, password } => {
-            login_with_password(uin, &password, protocol, data_folder, handler).await
+            login_with_password(uin, &password, protocol, data_folder, qsign_client, handler).await
         }
         LoginMethod::QrCode => {
             login_with_qrcode(
@@ -251,6 +265,7 @@ pub async fn login(
                     Ok(())
                 },
                 data_folder,
+                qsign_client,
                 handler,
             )
             .await

@@ -55,6 +55,7 @@ use anyhow::{anyhow, bail, Result};
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 use ricq::{device::OSVersion, Device};
+use ricq_core::protocol::qimei::Qimei;
 use serde_json::{Map, Value};
 
 macro_rules! parse_batch {
@@ -92,6 +93,7 @@ macro_rules! parse {
             "apn" => apn,
             "vendorName" => vendor_name,
             "vendorOsName" => vendor_os_name,
+            "qimei" => qimei,
         )
     }
 }
@@ -299,6 +301,29 @@ impl Parse<OSVersion> for V1 {
     }
 }
 
+impl Parse<Option<Qimei>> for V1 {
+    fn parse(
+        json: &Map<String, Value>,
+        key: &str,
+        _fallback: impl FnOnce() -> Option<Qimei>,
+    ) -> Result<Option<Qimei>> {
+        match json.get(key) {
+            None => Ok(None),
+            Some(v) => {
+                let qimei = v.as_object().ok_or_else(|| anyhow!("`{}` 格式错误", key))?;
+                let q16 = <V1 as Parse<String>>::parse(qimei, "q16", || "".to_string())?;
+                let q36 = <V1 as Parse<String>>::parse(qimei, "q36", || "".to_string())?;
+                if q16.is_empty() || q36.is_empty() {
+                    Ok(None)
+                } else {
+                    let qimei = Qimei { q16, q36 };
+                    Ok(Some(qimei))
+                }
+            }
+        }
+    }
+}
+
 struct V2;
 
 impl Parse<String> for V2 {
@@ -367,6 +392,29 @@ impl Parse<OSVersion> for V2 {
     }
 }
 
+impl Parse<Option<Qimei>> for V2 {
+    fn parse(
+        json: &Map<String, Value>,
+        key: &str,
+        _fallback: impl FnOnce() -> Option<Qimei>,
+    ) -> Result<Option<Qimei>> {
+        match json.get(key) {
+            None => Ok(None),
+            Some(v) => {
+                let qimei = v.as_object().ok_or_else(|| anyhow!("`{}` 格式错误", key))?;
+                let q16 = <V2 as Parse<String>>::parse(qimei, "q16", || "".to_string())?;
+                let q36 = <V2 as Parse<String>>::parse(qimei, "q36", || "".to_string())?;
+                if q16.is_empty() || q36.is_empty() {
+                    Ok(None)
+                } else {
+                    let qimei = Qimei { q16, q36 };
+                    Ok(Some(qimei))
+                }
+            }
+        }
+    }
+}
+
 trait Dump<T> {
     fn dump(value: &T) -> Value;
 }
@@ -397,5 +445,19 @@ impl Dump<OSVersion> for V2 {
         map.insert("codename".to_string(), V2::dump(&value.codename));
         map.insert("sdk".to_string(), V2::dump(&value.sdk));
         map.into()
+    }
+}
+
+impl Dump<Option<Qimei>> for V2 {
+    fn dump(value: &Option<Qimei>) -> Value {
+        match value {
+            None => Value::Null,
+            Some(qimei) => {
+                let mut map = Map::new();
+                map.insert("q16".to_string(), V2::dump(&qimei.q16));
+                map.insert("q36".to_string(), V2::dump(&qimei.q36));
+                map.into()
+            }
+        }
     }
 }
