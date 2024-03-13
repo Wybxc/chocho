@@ -22,7 +22,7 @@ pub(crate) async fn login_impl<Fut>(
     protocol: Protocol,
     data_folder: impl AsRef<Path>,
     qsign_client: Arc<QSignClient>,
-    handler: impl Handler + 'static + Send + Sync,
+    handler: impl Handler + 'static + Send,
     login_with_credential: impl FnOnce(Arc<ricq::Client>) -> Fut,
 ) -> Result<(Arc<Client>, AliveHandle)>
 where
@@ -76,7 +76,7 @@ async fn prepare_client(
     device: Device,
     protocol: Protocol,
     qsign_client: Arc<QSignClient>,
-    handler: impl Handler + 'static + Send + Sync,
+    handler: impl Handler + 'static + Send,
 ) -> tokio::io::Result<(Arc<ricq::Client>, JoinHandle<()>)> {
     let client = Arc::new(ricq::Client::new(
         device,

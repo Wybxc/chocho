@@ -60,7 +60,7 @@ pub async fn login_with_password(
     protocol: Protocol,
     data_folder: impl AsRef<Path>,
     qsign_client: Arc<QSignClient>,
-    handler: impl Handler + 'static + Send + Sync,
+    handler: impl Handler + 'static + Send,
 ) -> Result<(Arc<Client>, AliveHandle)> {
     login_impl(
         uin,

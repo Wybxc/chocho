@@ -186,7 +186,7 @@ pub enum LoginMethod {
 /// 包含登录客户端和保持在线句柄的元组。
 pub async fn login(
     data_folder: String,
-    handler: impl Handler + 'static + Send + Sync,
+    handler: impl Handler + 'static + Send,
     uin: Option<i64>,
     login_method: Option<LoginMethod>,
     qsign_client: Arc<QSignClient>,

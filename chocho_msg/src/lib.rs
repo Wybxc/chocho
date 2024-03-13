@@ -139,7 +139,9 @@ impl Message {
     pub fn push(&mut self, elem: impl Into<RQElem>) -> &mut Self {
         match elem.into() {
             RQElem::Text(text) => {
-                if let Some(OriginMessageElement::Text(last_text)) = self.orig_elems.last_mut() && last_text.attr6_buf().is_empty() {
+                if let Some(OriginMessageElement::Text(last_text)) = self.orig_elems.last_mut()
+                    && last_text.attr6_buf().is_empty()
+                {
                     if let Some(last_str) = &mut last_text.str {
                         last_str.push_str(&text.content);
                     } else {

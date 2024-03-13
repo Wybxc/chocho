@@ -50,7 +50,7 @@ pub async fn login_with_qrcode(
     show_qrcode: impl FnMut(Bytes) -> Result<()>,
     data_folder: impl AsRef<Path>,
     qsign_client: Arc<QSignClient>,
-    handler: impl Handler + 'static + Send + Sync,
+    handler: impl Handler + 'static + Send,
 ) -> Result<(Arc<Client>, AliveHandle)> {
     login_impl(
         uin,

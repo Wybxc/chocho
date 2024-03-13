@@ -83,7 +83,7 @@ impl PartlyHandler for Handler {
                     .as_object()?
                     .get("data")?
                     .as_array()?
-                    .get(0)?
+                    .first()?
                     .as_object()?
                     .get("url")?
                     .as_str()?
